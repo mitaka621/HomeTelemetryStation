@@ -12,3 +12,5 @@
     <img src="parts/s-l1200.jpg" alt="err">
   </li>
 </ul>
+<h1>Photos</h1>
+<img src="Photos/IMG20240416012748.jpg" alt="err">
