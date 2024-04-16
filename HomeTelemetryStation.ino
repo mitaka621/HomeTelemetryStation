@@ -56,23 +56,29 @@ float calculateCPM() {
     return cpm;
 }
 
-void handleGetData() {
-    float humidity = dht.readHumidity();
-    float temperature = dht.readTemperature();
+float humidity = 0;
+float temperature = 0;
 
-    float cpm=calculateCPM();
-    float rad=calculateRadiation(cpm);
+float cpm=0;
+float rad=0;
+
+void handleGetData() {
+    humidity = dht.readHumidity();
+    temperature = dht.readTemperature();
+
+    cpm=calculateCPM();
+    rad=calculateRadiation(cpm);
 
     Serial.println(cpm);
     Serial.print(rad);
     Serial.println(" µSv");
 
     Serial.println(humidity);
-    Serial.println(temperature);
-
-    String response = "{\"temperature\":" + String(temperature) + ",\"humidity\":" + String(humidity)+ ",\"cpm\":" + String(cpm)+ ",\"rad\":" + String(rad) + "}";
-    server.send(200, "application/json", response);
+    Serial.println(temperature);  
 }
+
+unsigned long previousMillis = 0; 
+const long interval = 5 * 60 * 1000; //5 min in milisec
 
 void setup() {
     startTime=millis();
@@ -95,13 +101,27 @@ void setup() {
     pinMode(GEIGER_PIN, INPUT);
     attachInterrupt(digitalPinToInterrupt(GEIGER_PIN), handleGeigerInterrupt, RISING); //Callback when the geiger detects a click
 
-    server.on("/data", HTTP_GET, handleGetData);
+    server.on("/data", HTTP_GET, [temperature,humidity,cpm,rad](){
+      String response = "{\"Temperature\":" + String(temperature) + ",\"Humidity\":" + String(humidity)+ ",\"CPM\":" + String(cpm)+ ",\"Radiation\":" + String(rad) + "}";
+      server.send(200, "application/json", response);
+    });
+
     server.begin();
     Serial.println("HTTP server started");
+
+    Serial.println("Gathering Data (5 min)...");
 }
 
 void loop() {
     server.handleClient();
+
+    unsigned long currentMillis = millis();
+
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+
+    handleGetData();
+  }
 }
 
 
