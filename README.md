@@ -1,3 +1,10 @@
+<h1>Instructions</h1>
+<ol>
+ <li>Connect the esp32, dht11 and the geiger counter</li>
+  <li>Download HomeTelemetryStation.ino, replace your wifi credantials and set your static ip (optional)</li>
+ <li>Upload the scketch to the esp32</li>
+ <li>When the initial data gathering is finished you can use the /data endpoint to get your json file</li>
+</or>
 <h1>Diagram</h1>
  <img src="Diagrams/diagram v1.0.png" alt="err">
 <h1>Parts Used</h1>
