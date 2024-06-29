@@ -6,10 +6,12 @@
 const char* ssid = "ditoge03";
 const char* password = "mitko111";
 
-#define DHTPIN 23          
+//#define DHTPIN 23   
+#define DHTPIN 2          
 #define DHTTYPE DHT11     
 
-#define GEIGER_PIN 12 
+//#define GEIGER_PIN 12
+#define GEIGER_PIN 10
 int clicksCount = 0;
 volatile unsigned long startTime = 0;   
 
@@ -58,13 +60,20 @@ float calculateCPM() {
 
 float humidity = 0;
 float temperature = 0;
+float tempSum=0;
+float humiditySum=0;
+double countTempData=0.0;
 
 float cpm=0;
 float rad=0;
 
 void handleGetData() {
-    humidity = dht.readHumidity();
-    temperature = dht.readTemperature();
+    humidity =humiditySum/countTempData;
+    temperature =  tempSum/countTempData;
+
+    tempSum=0;
+    humiditySum=0;
+    countTempData=0.0;
 
     cpm=calculateCPM();
     rad=calculateRadiation(cpm);
@@ -79,6 +88,9 @@ void handleGetData() {
 
 unsigned long previousMillis = 0; 
 const long interval = 5 * 60 * 1000; //5 min in milisec
+
+unsigned long previousMillisTemp = 0; 
+const long tempGatherInterval = 60 * 1000; //1 min in milisec
 
 void setup() {
     startTime=millis();
@@ -119,8 +131,16 @@ void loop() {
 
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
-
     handleGetData();
+  }
+
+  if (currentMillis - previousMillisTemp >= tempGatherInterval) {
+    Serial.println("Collecting temp and humidity data.");
+    previousMillisTemp = currentMillis;
+    tempSum+=dht.readTemperature();
+    humiditySum += dht.readHumidity();
+
+    countTempData++;
   }
 }
 
