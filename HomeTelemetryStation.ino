@@ -68,8 +68,13 @@ float cpm=0;
 float rad=0;
 
 void handleGetData() {
-    humidity =humiditySum/countTempData;
-    temperature =  tempSum/countTempData;
+  if(countTempData==0){
+    temperature=dht.readTemperature();
+    humidity = dht.readHumidity();
+  }else{
+    humidity= humiditySum/countTempData;
+    temperature= tempSum/countTempData;
+  }
 
     tempSum=0;
     humiditySum=0;
