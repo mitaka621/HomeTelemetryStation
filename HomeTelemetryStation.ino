@@ -6,8 +6,11 @@
 const char* ssid = "ditoge03";
 const char* password = "mitko111";
 
+#define DEBOUNCE_INTERVAL 50
+volatile unsigned long last_interrupt_time = 0;
+
 //#define DHTPIN 23   
-#define DHTPIN 2          
+#define DHTPIN 2        
 #define DHTTYPE DHT11     
 
 //#define GEIGER_PIN 12
@@ -24,8 +27,15 @@ IPAddress gateway(192, 168, 0, 1);
 IPAddress subnet(255, 255, 255, 0);
 IPAddress dns(8, 8, 8, 8);
 
-void IRAM_ATTR handleGeigerInterrupt() {
-    clicksCount++;
+void IRAM_ATTR handleGeigerInterrupt() {   
+    unsigned long interrupt_time = millis();
+
+    if (interrupt_time - last_interrupt_time > DEBOUNCE_INTERVAL) {
+        clicksCount++;
+        Serial.println("Geiger pulse detected!");
+    }
+    
+    last_interrupt_time = interrupt_time;
 }
 
 float conversionFactor = 0.00331; // 0.00331 µSv per click
